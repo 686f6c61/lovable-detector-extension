@@ -1,0 +1,29 @@
+
+{
+  "manifest_version": 3,
+  "name": "Te Pillé",
+  "version": "1.0",
+  "description": "Detecta si una web fue creada con Lovable.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "background": {
+    "service_worker": "background.js" // Specifies the background script for event handling
+  },
+  "action": {
+    "default_popup": "popup.html" // Defines the HTML file for the extension's popup
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"], // Specifies that the content script runs on all URLs
+      "js": ["content.js"] // Injects content.js into matching web pages
+    }
+  ],
+  "icons": {
+    "16": "images/icon16.png", // Default icon for 16x16 size
+    "48": "images/icon48.png", // Default icon for 48x48 size
+    "128": "images/icon128.png" // Default icon for 128x128 size
+  }
+}
