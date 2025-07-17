@@ -1,0 +1,35 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Te Pillé</title>
+  <link rel="stylesheet" type="text/css" href="popup.css"> <!-- Link to the popup's styling -->
+</head>
+<body class="hacker-mode"> <!-- Applies the hacker aesthetic by default -->
+  <!-- Section displayed when a framework is detected -->
+  <div id="result">
+    <h1 id="title">¡Te Pillé!</h1>
+    <p>Esta web usa <strong id="framework-name">...</strong></p>
+  </div>
+  <!-- Section displayed when no framework is detected -->
+  <div id="no-result">
+    <h1>Nada por aquí...</h1>
+    <p>No se detectó ninguna tecnología conocida.</p>
+  </div>
+
+  <!-- Footer section with project description and link -->
+  <div class="footer">
+    <p class="description">Esta extensión detecta si una web fue creada con Lovable.</p>
+    <a href="#" id="view-project-link">Ver proyecto</a> <!-- Link to view project details -->
+  </div>
+
+  <!-- Section to display project details (hacker aesthetic) -->
+  <div id="about-content">
+    <div id="about-text"></div> <!-- Content from about.html will be loaded here -->
+    <button id="back-button" class="back-button">Volver</button> <!-- Button to go back to main view -->
+  </div>
+
+  <script src="popup.js"></script> <!-- Link to the popup's JavaScript logic -->
+</body>
+</html>

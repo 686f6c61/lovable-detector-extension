@@ -1,0 +1,76 @@
+/*
+ * Styles for the extension's popup, implementing a hacker aesthetic.
+ */
+body {
+  width: 280px;
+  text-align: center;
+  background-color: #000000; /* Black background */
+  color: #00FF00; /* Fluorescent green text */
+  font-family: 'Roboto Mono', 'Fira Code', 'Consolas', monospace; /* Monospaced font for hacker feel */
+  border: 2px solid #00FF00; /* Green border */
+  box-shadow: 0 0 15px rgba(0, 255, 0, 0.7); /* Green glow effect */
+  padding: 15px;
+  box-sizing: border-box;
+  border-radius: 8px;
+}
+
+h1 {
+  color: #00FFFF; /* Cyan for headings */
+  text-shadow: 0 0 5px #00FF00; /* Green shadow for headings */
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+p {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Styling for content sections (result, no-result, about-content) */
+#result, #no-result, #about-content {
+  display: none;
+  background-color: #1a1a1a; /* Dark gray for content areas */
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  border: 1px dashed #00FF00; /* Dashed green border */
+  box-shadow: none;
+}
+
+/* Styling for the footer section */
+.footer {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px dashed #00FF00; /* Dashed green border for footer */
+}
+
+/* Styling for the description text in the footer */
+.description {
+  font-size: 12px;
+  color: #00FF00;
+  margin-bottom: 10px;
+}
+
+/* Styling for links */
+a {
+  color: #FF00FF; /* Magenta for links */
+  text-decoration: none;
+  font-weight: bold;
+  text-shadow: 0 0 3px #FF00FF; /* Magenta glow for links */
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Styling for the back button */
+.back-button {
+  background-color: #FF00FF; /* Magenta background */
+  color: #000000; /* Black text */
+  border: 1px solid #00FF00; /* Green border */
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 15px;
+  font-size: 13px;
+}
