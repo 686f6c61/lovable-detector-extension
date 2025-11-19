@@ -1,35 +1,125 @@
 
 <!DOCTYPE html>
 <html>
+<!--
+  ============================================================================
+  Te Pillé - Lovable Framework Detector
+  ============================================================================
+
+  Popup HTML - Estructura de la interfaz de usuario
+
+  @file        popup.html
+  @description HTML del popup de la extensión. Define la estructura de las
+               vistas: detección, historial y about. Incluye secciones de
+               estadísticas, historial y navegación.
+
+  @author      686f6c61 (https://github.com/686f6c61)
+  @repository  https://github.com/686f6c61/lovable-detector-extension
+  @version     1.1
+  @date        2025-11-19
+  @license     MIT
+
+  Vistas implementadas:
+  - #result: Muestra cuando se detecta Lovable
+  - #no-result: Muestra cuando no se detecta
+  - #history-content: Vista de historial de detecciones
+  - #about-content: Información del proyecto
+
+  ============================================================================
+-->
 <head>
   <meta charset="UTF-8">
   <title>Te Pillé</title>
-  <link rel="stylesheet" type="text/css" href="popup.css"> <!-- Link to the popup's styling -->
+  <link rel="stylesheet" type="text/css" href="popup.css">
 </head>
-<body class="hacker-mode"> <!-- Applies the hacker aesthetic by default -->
-  <!-- Section displayed when a framework is detected -->
+<body class="hacker-mode">
+
+  <!-- ========================================================================
+       VISTA DE DETECCIÓN POSITIVA
+       Mostrada cuando se detecta que el sitio usa Lovable
+       ======================================================================== -->
   <div id="result">
     <h1 id="title">¡Te Pillé!</h1>
     <p>Esta web usa <strong id="framework-name">...</strong></p>
+
+    <!-- Sección de estadísticas -->
+    <div class="stats-section" id="stats-section">
+      <div class="stat-item">
+        <span class="stat-label">Total detectados:</span>
+        <span class="stat-value" id="total-detections">0</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">URL actual:</span>
+        <span class="stat-value" id="current-url">-</span>
+      </div>
+    </div>
+
+    <!-- Link para ver el historial completo -->
+    <div style="margin-top: 10px;">
+      <a href="#" id="toggle-history-link">Ver historial</a>
+    </div>
   </div>
-  <!-- Section displayed when no framework is detected -->
+
+  <!-- ========================================================================
+       VISTA DE NO DETECCIÓN
+       Mostrada cuando NO se detecta Lovable en el sitio
+       ======================================================================== -->
   <div id="no-result">
     <h1>Nada por aquí...</h1>
     <p>No se detectó ninguna tecnología conocida.</p>
+
+    <!-- Sección de estadísticas (solo total) -->
+    <div class="stats-section" id="stats-section-no-result">
+      <div class="stat-item">
+        <span class="stat-label">Total detectados:</span>
+        <span class="stat-value" id="total-detections-no-result">0</span>
+      </div>
+    </div>
+
+    <!-- Link para ver el historial -->
+    <div style="margin-top: 10px;">
+      <a href="#" id="toggle-history-link-no-result">Ver historial</a>
+    </div>
   </div>
 
-  <!-- Footer section with project description and link -->
+  <!-- ========================================================================
+       VISTA DE HISTORIAL
+       Muestra lista de todos los sitios Lovable detectados previamente
+       ======================================================================== -->
+  <div id="history-content" style="display: none;">
+    <h1>Historial de Detecciones</h1>
+    <!-- Contenedor scrollable con las detecciones -->
+    <div class="history-section" id="history-list">
+      <p class="loading-text">Cargando historial...</p>
+    </div>
+    <button id="back-from-history" class="back-button">Volver</button>
+  </div>
+
+  <!-- ========================================================================
+       FOOTER
+       Descripción de la extensión y link al proyecto
+       ======================================================================== -->
   <div class="footer">
     <p class="description">Esta extensión detecta si una web fue creada con Lovable.</p>
-    <a href="#" id="view-project-link">Ver proyecto</a> <!-- Link to view project details -->
+    <a href="#" id="view-project-link">Ver proyecto</a>
   </div>
 
-  <!-- Section to display project details (hacker aesthetic) -->
+  <!-- ========================================================================
+       VISTA ABOUT
+       Información detallada del proyecto cargada desde about.html
+       ======================================================================== -->
   <div id="about-content">
-    <div id="about-text"></div> <!-- Content from about.html will be loaded here -->
-    <button id="back-button" class="back-button">Volver</button> <!-- Button to go back to main view -->
+    <!-- Indicador de carga (spinner animado) -->
+    <div id="loading-indicator" style="display: none;">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">Cargando información del proyecto...</p>
+    </div>
+    <!-- Contenedor donde se inserta el HTML de about.html -->
+    <div id="about-text"></div>
+    <button id="back-button" class="back-button">Volver</button>
   </div>
 
-  <script src="popup.js"></script> <!-- Link to the popup's JavaScript logic -->
+  <!-- Script principal del popup -->
+  <script src="popup.js"></script>
 </body>
 </html>

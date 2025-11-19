@@ -1,29 +1,69 @@
-
 {
+  "/*": "============================================================================",
+  "/* Autor": "686f6c61 (https://github.com/686f6c61)",
+  "/* Repositorio": "https://github.com/686f6c61/lovable-detector-extension",
+  "/* Versión": "1.2",
+  "/* Fecha": "2025-11-19",
+  "/* Licencia": "MIT",
+  "/**/": "============================================================================",
+
   "manifest_version": 3,
   "name": "Te Pillé",
-  "version": "1.0",
+  "version": "1.2",
   "description": "Detecta si una web fue creada con Lovable.",
+
+  "__comment_permissions": "Permisos necesarios para la funcionalidad de la extensión",
   "permissions": [
-    "activeTab",
-    "scripting",
-    "storage"
+    "storage",
+    "tabs"
   ],
+
+  "__comment_host_permissions": "Acceso a todas las URLs para inyectar content script",
+  "host_permissions": [
+    "<all_urls>"
+  ],
+
+  "__comment_background": "Service Worker (Manifest V3) - Maneja detecciones y storage",
   "background": {
-    "service_worker": "background.js" // Specifies the background script for event handling
+    "service_worker": "background.js"
   },
+
+  "__comment_action": "Configuración del popup e iconos de la extensión",
   "action": {
-    "default_popup": "popup.html" // Defines the HTML file for the extension's popup
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "images/icon16.png",
+      "48": "images/icon48.png",
+      "128": "images/icon128.png"
+    }
   },
+
+  "__comment_content_scripts": "Script inyectado en todas las páginas para detectar Lovable",
   "content_scripts": [
     {
-      "matches": ["<all_urls>"], // Specifies that the content script runs on all URLs
-      "js": ["content.js"] // Injects content.js into matching web pages
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
     }
   ],
+
+  "__comment_icons": "Iconos de la extensión en diferentes tamaños",
   "icons": {
-    "16": "images/icon16.png", // Default icon for 16x16 size
-    "48": "images/icon48.png", // Default icon for 48x48 size
-    "128": "images/icon128.png" // Default icon for 128x128 size
-  }
+    "16": "images/icon16.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
+  },
+
+  "__comment_csp": "Content Security Policy - Protección contra XSS",
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; style-src 'self' 'unsafe-inline';"
+  },
+
+  "__comment_web_accessible": "Recursos accesibles desde páginas web",
+  "web_accessible_resources": [
+    {
+      "resources": ["about.html"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }
