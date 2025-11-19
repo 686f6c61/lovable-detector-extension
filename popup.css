@@ -1,24 +1,124 @@
-/*
- * Styles for the extension's popup, implementing a hacker aesthetic.
+/**
+ * ============================================================================
+ * Te Pillé - Lovable Framework Detector
+ * ============================================================================
+ *
+ * Popup Stylesheet - Estilos de la interfaz de usuario
+ *
+ * @file        popup.css
+ * @description Hoja de estilos completa para el popup de la extensión.
+ *              Implementa estética hacker con colores neón, animaciones CSS3,
+ *              responsive design y elementos interactivos.
+ *
+ * @author      686f6c61 (https://github.com/686f6c61)
+ * @repository  https://github.com/686f6c61/lovable-detector-extension
+ * @version     1.1
+ * @date        2025-11-19
+ * @license     MIT
+ *
+ * Paleta de colores:
+ * - Background: #000000 (Negro puro)
+ * - Primary: #00FF00 (Verde neón)
+ * - Secondary: #00FFFF (Cyan)
+ * - Accent: #FF00FF (Magenta)
+ * - Dark Gray: #1a1a1a, #0a0a0a
+ *
+ * Tipografía:
+ * - Font family: 'Roboto Mono', 'Fira Code', 'Consolas', monospace
+ * - Fuente monoespaciada para estética hacker/terminal
+ *
+ * Animaciones implementadas:
+ * - fadeIn: Entrada suave de elementos
+ * - pulse: Pulsación del borde del popup
+ * - glow: Resplandor en títulos
+ * - spin: Rotación para loading spinner
+ *
+ * ============================================================================
+ */
+
+/* ============================================================================
+ * KEYFRAMES - Definiciones de animaciones CSS
+ * ============================================================================ */
+/**
+ * Animación fadeIn - Entrada suave con desplazamiento vertical
+ * Usada en: secciones principales, footer, historial
+ */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);  /* Comienza 10px arriba */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);       /* Termina en posición normal */
+  }
+}
+
+/**
+ * Animación pulse - Pulsación del resplandor del borde
+ * Usada en: body (borde del popup)
+ */
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(0, 255, 0, 0.9);  /* Resplandor más intenso */
+  }
+}
+
+/**
+ * Animación glow - Resplandor pulsante en texto
+ * Usada en: h1 (títulos principales)
+ */
+@keyframes glow {
+  0%, 100% {
+    text-shadow: 0 0 5px #00FF00;
+  }
+  50% {
+    text-shadow: 0 0 10px #00FF00, 0 0 15px #00FF00;  /* Doble sombra para más intensidad */
+  }
+}
+
+/**
+ * Animación spin - Rotación continua
+ * Usada en: loading spinner
+ */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ============================================================================
+ * ESTILOS PRINCIPALES
+ * ============================================================================ */
+
+/**
+ * Body - Contenedor principal del popup
+ * Establece dimensiones, tema oscuro y animación pulse
  */
 body {
   width: 280px;
+  min-width: 280px;
+  max-width: 400px;
   text-align: center;
-  background-color: #000000; /* Black background */
-  color: #00FF00; /* Fluorescent green text */
-  font-family: 'Roboto Mono', 'Fira Code', 'Consolas', monospace; /* Monospaced font for hacker feel */
-  border: 2px solid #00FF00; /* Green border */
-  box-shadow: 0 0 15px rgba(0, 255, 0, 0.7); /* Green glow effect */
+  background-color: #000000;
+  color: #00FF00;
+  font-family: 'Roboto Mono', 'Fira Code', 'Consolas', monospace;
+  border: 2px solid #00FF00;
+  box-shadow: 0 0 15px rgba(0, 255, 0, 0.7);
   padding: 15px;
   box-sizing: border-box;
   border-radius: 8px;
+  animation: pulse 3s ease-in-out infinite;
 }
 
 h1 {
-  color: #00FFFF; /* Cyan for headings */
-  text-shadow: 0 0 5px #00FF00; /* Green shadow for headings */
+  color: #00FFFF;
+  text-shadow: 0 0 5px #00FF00;
   font-size: 20px;
   margin-bottom: 10px;
+  animation: glow 2s ease-in-out infinite;
 }
 
 p {
@@ -29,19 +129,21 @@ p {
 /* Styling for content sections (result, no-result, about-content) */
 #result, #no-result, #about-content {
   display: none;
-  background-color: #1a1a1a; /* Dark gray for content areas */
+  background-color: #1a1a1a;
   padding: 15px;
   margin-bottom: 10px;
   border-radius: 6px;
-  border: 1px dashed #00FF00; /* Dashed green border */
+  border: 1px dashed #00FF00;
   box-shadow: none;
+  animation: fadeIn 0.3s ease-in;
 }
 
 /* Styling for the footer section */
 .footer {
   margin-top: 20px;
   padding-top: 15px;
-  border-top: 1px dashed #00FF00; /* Dashed green border for footer */
+  border-top: 1px dashed #00FF00;
+  animation: fadeIn 0.5s ease-in;
 }
 
 /* Styling for the description text in the footer */
@@ -53,24 +155,158 @@ p {
 
 /* Styling for links */
 a {
-  color: #FF00FF; /* Magenta for links */
+  color: #FF00FF;
   text-decoration: none;
   font-weight: bold;
-  text-shadow: 0 0 3px #FF00FF; /* Magenta glow for links */
+  text-shadow: 0 0 3px #FF00FF;
+  transition: all 0.3s ease;
 }
 
 a:hover {
   text-decoration: underline;
+  text-shadow: 0 0 8px #FF00FF, 0 0 12px #FF00FF;
 }
 
 /* Styling for the back button */
 .back-button {
-  background-color: #FF00FF; /* Magenta background */
-  color: #000000; /* Black text */
-  border: 1px solid #00FF00; /* Green border */
+  background-color: #FF00FF;
+  color: #000000;
+  border: 1px solid #00FF00;
   padding: 8px 15px;
   border-radius: 4px;
   cursor: pointer;
   margin-top: 15px;
   font-size: 13px;
+  transition: all 0.3s ease;
+}
+
+.back-button:hover {
+  background-color: #00FF00;
+  color: #000000;
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+  transform: scale(1.05);
+}
+
+/* Loading spinner */
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(0, 255, 0, 0.3);
+  border-top: 3px solid #00FF00;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 10px auto;
+}
+
+.loading-text {
+  color: #00FFFF;
+  font-size: 12px;
+  margin-top: 10px;
+}
+
+/* History section */
+.history-section {
+  margin-top: 15px;
+  padding: 10px;
+  background-color: #0a0a0a;
+  border: 1px solid #00FF00;
+  border-radius: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  animation: fadeIn 0.4s ease-in;
+}
+
+.history-item {
+  padding: 8px;
+  margin: 5px 0;
+  background-color: #1a1a1a;
+  border-left: 3px solid #00FF00;
+  text-align: left;
+  font-size: 11px;
+  border-radius: 2px;
+  transition: all 0.2s ease;
+}
+
+.history-item:hover {
+  background-color: #2a2a2a;
+  border-left-color: #00FFFF;
+  transform: translateX(5px);
+}
+
+.history-url {
+  color: #00FFFF;
+  word-break: break-all;
+  display: block;
+  margin-bottom: 3px;
+}
+
+.history-time {
+  color: #888;
+  font-size: 10px;
+}
+
+/* Stats section */
+.stats-section {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #0a0a0a;
+  border: 1px dashed #00FF00;
+  border-radius: 4px;
+  animation: fadeIn 0.4s ease-in;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  font-size: 12px;
+}
+
+.stat-label {
+  color: #00FFFF;
+}
+
+.stat-value {
+  color: #FF00FF;
+  font-weight: bold;
+}
+
+/* Responsive design */
+@media (min-width: 320px) {
+  body {
+    width: 320px;
+  }
+}
+
+@media (min-width: 400px) {
+  body {
+    width: 400px;
+  }
+
+  h1 {
+    font-size: 22px;
+  }
+
+  p {
+    font-size: 15px;
+  }
+}
+
+/* Scrollbar styling for history section */
+.history-section::-webkit-scrollbar {
+  width: 8px;
+}
+
+.history-section::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+.history-section::-webkit-scrollbar-thumb {
+  background: #00FF00;
+  border-radius: 4px;
+}
+
+.history-section::-webkit-scrollbar-thumb:hover {
+  background: #00FFFF;
 }
