@@ -1,410 +1,291 @@
+const FRAMEWORK_NAME = "Lovable";
+const DETECTION_THRESHOLD = 5;
+const RELEVANT_ATTRIBUTES = new Set([
+  "id",
+  "class",
+  "src",
+  "href",
+  "content",
+  "data-proxy-url",
+  "aria-label"
+]);
 
-/**
- * ============================================================================
- * Te Pillé - Lovable Framework Detector
- * ============================================================================
- *
- * Content Script - Script de detección inyectado en páginas web
- *
- * @file        content.js
- * @description Script de contenido que se inyecta en todas las páginas web
- *              para detectar si fueron construidas con el framework Lovable.
- *              Utiliza múltiples métodos de detección y monitorea cambios
- *              dinámicos en el DOM.
- *
- * @author      686f6c61 (https://github.com/686f6c61)
- * @repository  https://github.com/686f6c61/lovable-detector-extension
- * @version     1.1
- * @date        2025-11-19
- * @license     MIT
- *
- * @requires    Chrome Extension API
- * @requires    DOM API
- * @requires    MutationObserver API
- *
- * Flujo de ejecución:
- * 1. Se ejecuta automáticamente cuando la página termina de cargar (document_idle)
- * 2. Ejecuta detectFramework() para buscar indicadores de Lovable
- * 3. Envía resultado al background script mediante chrome.runtime.sendMessage
- * 4. Inicia MutationObserver para detectar cambios dinámicos en el DOM
- * 5. Re-ejecuta detección si el DOM cambia (con debounce de 1 segundo)
- *
- * ============================================================================
- */
-
-/**
- * Detecta si la página web actual fue construida con el framework Lovable.
- *
- * Utiliza 11 métodos diferentes de detección para máxima precisión:
- * 1. Meta tag "keywords" con contenido "lovable"
- * 2. Meta tag "generator" con contenido "lovable"
- * 3. Meta tag "author" con contenido "lovable"
- * 4. Meta tag "description" con contenido "lovable"
- * 5. Scripts con dominio lovable.app
- * 6. Links con dominio lovable
- * 7. URLs con lovable-uploads (CDN de Lovable)
- * 8. Comentarios HTML que contengan "lovable"
- * 9. Clases CSS o IDs que contengan "lovable"
- * 10. Atributos data (data-lovable, data-framework)
- * 11. Análisis completo del código fuente HTML
- *
- * Todas las búsquedas son case-insensitive para mayor flexibilidad.
- * Incluye detección especial para SPAs (Single Page Applications).
- *
- * @function detectFramework
- * @returns {string|null} Retorna "Lovable" si se detecta el framework, null en caso contrario
- *
- * @example
- * const framework = detectFramework();
- * if (framework) {
- *   console.log(`Detectado: ${framework}`);
- * }
- */
-function detectFramework() {
-  try {
-    // === MÉTODO 1: Meta Tag Keywords ===
-    // Busca: <meta name="keywords" content="...lovable...">
-    // El flag 'i' hace la búsqueda case-insensitive
-    const lovableKeywords = document.querySelector('meta[name="keywords" i][content*="lovable" i]');
-    if (lovableKeywords) {
-      console.log("✓ Lovable detectado mediante meta tag keywords");
-      return "Lovable";
-    }
-
-    // === MÉTODO 2: Meta Tag Generator ===
-    // Busca: <meta name="generator" content="Lovable">
-    // Muchos frameworks incluyen esta etiqueta para identificarse
-    const lovableGenerator = document.querySelector('meta[name="generator" i][content*="lovable" i]');
-    if (lovableGenerator) {
-      console.log("✓ Lovable detectado mediante meta tag generator");
-      return "Lovable";
-    }
-
-    // === MÉTODO 3: Meta Tag Author ===
-    // Busca: <meta name="author" content="Lovable">
-    // Detecta cuando el autor es Lovable
-    const lovableAuthor = document.querySelector('meta[name="author" i][content*="lovable" i]');
-    if (lovableAuthor) {
-      console.log("✓ Lovable detectado mediante meta tag author");
-      return "Lovable";
-    }
-
-    // === MÉTODO 4: Meta Tag Description ===
-    // Busca: <meta name="description" content="...lovable...">
-    // Algunas páginas mencionan el framework en la descripción
-    const lovableDescription = document.querySelector('meta[name="description" i][content*="lovable" i]');
-    if (lovableDescription) {
-      console.log("✓ Lovable detectado mediante meta tag description");
-      return "Lovable";
-    }
-
-    // === MÉTODO 5: Scripts con dominio lovable.app ===
-    // Busca: <script src="https://...lovable.app/...">
-    // Detecta scripts cargados desde dominios de Lovable
-    const lovableScripts = document.querySelector('script[src*="lovable.app" i]');
-    if (lovableScripts) {
-      console.log("✓ Lovable detectado mediante script con dominio lovable.app");
-      return "Lovable";
-    }
-
-    // === MÉTODO 6: Links con dominio lovable ===
-    // Busca: <link href="https://...lovable..." rel="...">
-    // Detecta hojas de estilo u otros recursos de Lovable
-    const lovableLinks = document.querySelector('link[href*="lovable" i]');
-    if (lovableLinks) {
-      console.log("✓ Lovable detectado mediante link con dominio lovable");
-      return "Lovable";
-    }
-
-    // === MÉTODO 7: URLs con lovable-uploads ===
-    // Busca recursos alojados en CDN de Lovable
-    // Ejemplo: /lovable-uploads/...
-    const lovableUploads = document.querySelector('[src*="lovable-upload" i], [href*="lovable-upload" i]');
-    if (lovableUploads) {
-      console.log("✓ Lovable detectado mediante recursos lovable-uploads");
-      return "Lovable";
-    }
-
-    // === MÉTODO 8: Comentarios HTML ===
-    // Busca comentarios en el código HTML: <!-- Built with Lovable -->
-    // Usa regex para buscar en todo el documento
-    const htmlContent = document.documentElement.outerHTML;
-    if (/<!--.*lovable.*-->/i.test(htmlContent)) {
-      console.log("✓ Lovable detectado mediante comentarios HTML");
-      return "Lovable";
-    }
-
-    // === MÉTODO 9: Clases CSS e IDs ===
-    // Busca elementos con clases o IDs que contengan "lovable"
-    // Ejemplo: <div class="lovable-container"> o <div id="lovable-app">
-    const lovableClasses = document.querySelector('[class*="lovable" i], [id*="lovable" i]');
-    if (lovableClasses) {
-      console.log("✓ Lovable detectado mediante clases CSS o IDs");
-      return "Lovable";
-    }
-
-    // === MÉTODO 10: Atributos Data ===
-    // Busca atributos data-lovable o data-framework="lovable"
-    // Ejemplo: <div data-lovable="true"> o <div data-framework="lovable">
-    const lovableData = document.querySelector('[data-lovable], [data-framework*="lovable" i]');
-    if (lovableData) {
-      console.log("✓ Lovable detectado mediante atributos data");
-      return "Lovable";
-    }
-
-    // === MÉTODO 11: Análisis de código fuente completo ===
-    // Busca la palabra "lovable" en cualquier parte del HTML (última verificación)
-    if (/lovable/i.test(htmlContent)) {
-      console.log("✓ Lovable detectado mediante análisis completo del código fuente");
-      return "Lovable";
-    }
-
-    // No se detectó ningún framework conocido
-    console.log("✗ No se detectó ningún framework conocido");
-    return null;
-
-  } catch (error) {
-    // Captura cualquier error durante la detección
-    console.error("❌ Error durante la detección del framework:", error);
-    return null;
+const SIGNAL_DEFINITIONS = [
+  {
+    id: "lovable-subdomain",
+    label: "Host .lovable.app",
+    weight: 5,
+    strong: true,
+    test: () => location.hostname.toLowerCase().endsWith(".lovable.app")
+  },
+  {
+    id: "flock-script",
+    label: "Script ~flock.js",
+    weight: 5,
+    strong: true,
+    test: () => Boolean(
+      document.querySelector('script[src*="/~flock.js" i], script[src*=".lovable.app/~flock.js" i]')
+    )
+  },
+  {
+    id: "analytics-proxy",
+    label: "Proxy analytics lovable",
+    weight: 4,
+    strong: true,
+    test: () => Boolean(
+      document.querySelector(
+        'script[data-proxy-url*="/~api/analytics" i], script[data-proxy-url*=".lovable.app/~api/analytics" i]'
+      )
+    )
+  },
+  {
+    id: "badge-root",
+    label: "Elemento #lovable-badge",
+    weight: 4,
+    strong: true,
+    test: () => Boolean(document.getElementById("lovable-badge"))
+  },
+  {
+    id: "badge-project-link",
+    label: "Link a lovable.dev/projects",
+    weight: 4,
+    strong: true,
+    test: () => Boolean(
+      document.querySelector('a[href*="lovable.dev/projects" i], [aria-label*="Edit with Lovable" i]')
+    )
+  },
+  {
+    id: "meta-author",
+    label: "Meta author Lovable",
+    weight: 2,
+    strong: false,
+    test: () => Boolean(document.querySelector('meta[name="author" i][content*="lovable" i]'))
+  },
+  {
+    id: "meta-description-generated",
+    label: "Meta Lovable Generated Project",
+    weight: 2,
+    strong: false,
+    test: () => Boolean(
+      document.querySelector('meta[name="description" i][content*="Lovable Generated Project" i]')
+    )
+  },
+  {
+    id: "twitter-site-lovable",
+    label: "Twitter site lovable",
+    weight: 2,
+    strong: false,
+    test: () => Boolean(document.querySelector('meta[name="twitter:site" i][content*="lovable" i]'))
+  },
+  {
+    id: "lovable-resource-domain",
+    label: "Recurso desde .lovable.app",
+    weight: 3,
+    strong: false,
+    test: () => Boolean(document.querySelector('[src*=".lovable.app" i], [href*=".lovable.app" i]'))
+  },
+  {
+    id: "badge-selectors",
+    label: "Selectores de badge",
+    weight: 3,
+    strong: false,
+    test: () => Boolean(document.querySelector('#lovable-badge-cta, #lovable-badge-close'))
   }
-}
+];
 
-/**
- * Implementa la técnica de debounce para limitar la frecuencia de ejecución de una función.
- *
- * El debounce es útil para eventos que se disparan frecuentemente (como scroll, resize, input).
- * Esta función asegura que la función objetivo solo se ejecute después de que haya pasado
- * cierto tiempo desde la última invocación.
- *
- * @function debounce
- * @param {Function} func - La función a la que se aplicará debounce
- * @param {number} wait - Milisegundos que deben pasar sin nueva invocación antes de ejecutar
- * @returns {Function} Versión debounced de la función original
- *
- * @example
- * const debouncedSearch = debounce(() => {
- *   console.log('Buscando...');
- * }, 500);
- * // Se ejecutará solo 500ms después de la última llamada
- */
+const MAX_SCORE = SIGNAL_DEFINITIONS.reduce((sum, signal) => sum + signal.weight, 0);
+let lastMessageSignature = null;
+
 function debounce(func, wait) {
   let timeout;
-  return function executedFunction(...args) {
-    // Función que se ejecutará después del delay
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    // Cancela el timeout anterior si existe
+  return (...args) => {
     clearTimeout(timeout);
-    // Programa una nueva ejecución
-    timeout = setTimeout(later, wait);
+    timeout = setTimeout(() => func(...args), wait);
   };
 }
 
-/**
- * Envía el resultado de la detección al background script.
- *
- * Esta función se comunica con el service worker (background.js) mediante
- * chrome.runtime.sendMessage para notificar si se detectó Lovable o no.
- * El background script actualizará el icono y almacenará la información.
- *
- * @function sendDetectionMessage
- * @param {string|null} framework - Nombre del framework detectado ("Lovable") o null si no hay detección
- *
- * @fires chrome.runtime.sendMessage
- *
- * @example
- * sendDetectionMessage("Lovable");  // Notifica detección positiva
- * sendDetectionMessage(null);       // Notifica que no se detectó nada
- */
-function sendDetectionMessage(framework) {
+function collectSignals() {
+  const hits = [];
+  for (const signal of SIGNAL_DEFINITIONS) {
+    let matched = false;
+    try {
+      matched = signal.test();
+    } catch (error) {
+      console.warn(`[Te Pille] Signal failed: ${signal.id}`, error);
+    }
+    if (matched) {
+      hits.push(signal);
+    }
+  }
+  return hits;
+}
+
+function detectLovable() {
+  const hits = collectSignals();
+  const score = hits.reduce((sum, hit) => sum + hit.weight, 0);
+  const strongHits = hits.filter((hit) => hit.strong).length;
+  const detected = strongHits > 0 || score >= DETECTION_THRESHOLD;
+
+  let confidence = Math.round((score / MAX_SCORE) * 100);
+  if (detected && strongHits > 0) {
+    confidence = Math.max(confidence, 72);
+  }
+  if (!detected) {
+    confidence = Math.min(confidence, 49);
+  }
+
+  return {
+    detected,
+    framework: detected ? FRAMEWORK_NAME : null,
+    score,
+    confidence: Math.max(0, Math.min(99, confidence)),
+    signals: hits.map((hit) => hit.label),
+    strongSignalCount: strongHits
+  };
+}
+
+function sendDetectionMessage(result, reason) {
   try {
-    if (framework) {
-      // Framework detectado - enviar mensaje positivo
-      console.log(`📤 Enviando mensaje: Detectado ${framework}`);
-      chrome.runtime.sendMessage(
-        { detected: true, framework: framework },
-        (response) => {
-          // Verifica si hubo error en la comunicación
-          if (chrome.runtime.lastError) {
-            console.error("❌ Error enviando mensaje:", chrome.runtime.lastError.message);
-          }
+    chrome.runtime.sendMessage(
+      {
+        type: "LOVABLE_DETECTION",
+        reason,
+        detected: result.detected,
+        framework: result.framework,
+        score: result.score,
+        confidence: result.confidence,
+        signals: result.signals,
+        checkedAt: Date.now()
+      },
+      () => {
+        if (chrome.runtime.lastError) {
+          console.debug("[Te Pille] Message not delivered:", chrome.runtime.lastError.message);
         }
-      );
-    } else {
-      // No se detectó framework - enviar mensaje negativo
-      console.log("📤 Enviando mensaje: No se detectó framework");
-      chrome.runtime.sendMessage(
-        { detected: false },
-        (response) => {
-          // Verifica si hubo error en la comunicación
-          if (chrome.runtime.lastError) {
-            console.error("❌ Error enviando mensaje:", chrome.runtime.lastError.message);
-          }
-        }
-      );
-    }
-  } catch (error) {
-    // Captura errores inesperados en el envío del mensaje
-    console.error("❌ Error en sendDetectionMessage:", error);
-  }
-}
-
-// ============================================================================
-// EJECUCIÓN PRINCIPAL
-// ============================================================================
-
-// Variable para almacenar el último framework detectado
-let lastDetectedFramework = null;
-
-// Ejecuta la detección inicial cuando el script se carga
-console.log("🔍 Iniciando detección de Lovable...");
-const framework = detectFramework();
-lastDetectedFramework = framework;
-sendDetectionMessage(framework);
-
-// ============================================================================
-// MONITOREO DE CAMBIOS DINÁMICOS EN EL DOM
-// ============================================================================
-
-/**
- * Función de detección con debounce aplicado.
- * Se ejecutará solo 1 segundo después del último cambio en el DOM.
- * Esto evita ejecutar la detección cientos de veces durante cambios masivos.
- */
-const debouncedDetection = debounce(() => {
-  console.log("🔄 Re-ejecutando detección por cambios en el DOM...");
-  const newFramework = detectFramework();
-
-  // Solo envía mensaje si el estado de detección cambió
-  if (newFramework !== lastDetectedFramework) {
-    console.log(`📊 Estado cambió de ${lastDetectedFramework} a ${newFramework}`);
-    lastDetectedFramework = newFramework;
-    sendDetectionMessage(newFramework);
-  }
-}, 1000); // Espera 1 segundo después del último cambio
-
-/**
- * MutationObserver para detectar cambios dinámicos en el DOM.
- *
- * Observa:
- * - Adición/eliminación de nodos (childList: true)
- * - Cambios en todo el árbol DOM (subtree: true)
- * - Cambios en atributos específicos (attributes: true + attributeFilter)
- *
- * Esto es útil para sitios con contenido cargado dinámicamente mediante JavaScript,
- * SPAs (Single Page Applications), o frameworks que renderizan contenido de forma asíncrona.
- */
-const observer = new MutationObserver(debouncedDetection);
-
-// Inicia la observación del DOM
-try {
-  observer.observe(document.documentElement, {
-    childList: true,     // Observa adición/eliminación de nodos hijos
-    subtree: true,       // Observa todo el árbol DOM, no solo hijos directos
-    attributes: true,    // Observa cambios en atributos
-    attributeFilter: ['class', 'id', 'data-framework', 'data-lovable']  // Solo estos atributos
-  });
-  console.log("👁️ MutationObserver configurado y activo");
-} catch (error) {
-  console.error("❌ Error configurando MutationObserver:", error);
-}
-
-// ============================================================================
-// DETECCIÓN DE NAVEGACIÓN SPA (Single Page Applications)
-// ============================================================================
-
-/**
- * Monitorea cambios de URL en SPAs sin recarga de página.
- *
- * Las SPAs usan History API para cambiar la URL sin recargar.
- * Esto detecta esos cambios y re-ejecuta la detección.
- */
-
-let lastUrl = location.href;
-
-/**
- * Observador de cambios en la URL mediante polling.
- * Verifica cada 500ms si la URL cambió.
- */
-const urlCheckInterval = setInterval(() => {
-  if (location.href !== lastUrl) {
-    console.log(`🔀 Navegación SPA detectada: ${lastUrl} → ${location.href}`);
-    lastUrl = location.href;
-
-    // Re-ejecuta detección inmediatamente
-    setTimeout(() => {
-      console.log("🔍 Re-ejecutando detección por navegación SPA...");
-      const newFramework = detectFramework();
-
-      if (newFramework !== lastDetectedFramework) {
-        console.log(`📊 Estado cambió tras navegación de ${lastDetectedFramework} a ${newFramework}`);
-        lastDetectedFramework = newFramework;
-        sendDetectionMessage(newFramework);
       }
-    }, 500); // Espera 500ms para que el DOM se actualice
+    );
+  } catch (error) {
+    console.error("[Te Pille] sendDetectionMessage failed:", error);
   }
-}, 500); // Verifica cada 500ms
+}
 
-/**
- * Intercepta pushState y replaceState para detectar navegación SPA.
- * Estos métodos se usan en SPAs para cambiar la URL sin recargar.
- */
-const originalPushState = history.pushState;
-const originalReplaceState = history.replaceState;
+function runDetection(reason) {
+  const result = detectLovable();
+  const signature = `${location.href}|${result.detected}|${result.score}|${result.signals.join(",")}`;
 
-// Sobrescribe pushState
-history.pushState = function(...args) {
-  originalPushState.apply(this, args);
-  console.log("🔀 pushState detectado, URL cambió");
+  if (signature !== lastMessageSignature) {
+    lastMessageSignature = signature;
+    sendDetectionMessage(result, reason);
+  }
+}
 
-  // Re-ejecuta detección después de un delay
-  setTimeout(() => {
-    console.log("🔍 Re-ejecutando detección por pushState...");
-    const newFramework = detectFramework();
+function elementLooksRelevant(element) {
+  if (!element || element.nodeType !== Node.ELEMENT_NODE) {
+    return false;
+  }
 
-    if (newFramework !== lastDetectedFramework) {
-      console.log(`📊 Estado cambió de ${lastDetectedFramework} a ${newFramework}`);
-      lastDetectedFramework = newFramework;
-      sendDetectionMessage(newFramework);
+  const tagName = element.tagName;
+  if (tagName === "SCRIPT" || tagName === "LINK" || tagName === "META") {
+    return true;
+  }
+
+  if (typeof element.id === "string" && element.id.toLowerCase().includes("lovable")) {
+    return true;
+  }
+
+  if (typeof element.className === "string" && element.className.toLowerCase().includes("lovable")) {
+    return true;
+  }
+
+  if (
+    element.matches &&
+    element.matches(
+      '[src*="lovable" i], [href*="lovable" i], [data-proxy-url*="lovable" i], [aria-label*="lovable" i]'
+    )
+  ) {
+    return true;
+  }
+
+  if (!element.querySelector) {
+    return false;
+  }
+
+  return Boolean(
+    element.querySelector(
+      'script[src*="lovable" i], link[href*="lovable" i], meta[content*="lovable" i], [id*="lovable" i], [class*="lovable" i], [data-proxy-url*="lovable" i]'
+    )
+  );
+}
+
+function hasRelevantMutation(records) {
+  for (const record of records) {
+    if (record.type === "attributes" && RELEVANT_ATTRIBUTES.has(record.attributeName || "")) {
+      return true;
     }
-  }, 500);
-};
 
-// Sobrescribe replaceState
-history.replaceState = function(...args) {
-  originalReplaceState.apply(this, args);
-  console.log("🔀 replaceState detectado, URL cambió");
-
-  // Re-ejecuta detección después de un delay
-  setTimeout(() => {
-    console.log("🔍 Re-ejecutando detección por replaceState...");
-    const newFramework = detectFramework();
-
-    if (newFramework !== lastDetectedFramework) {
-      console.log(`📊 Estado cambió de ${lastDetectedFramework} a ${newFramework}`);
-      lastDetectedFramework = newFramework;
-      sendDetectionMessage(newFramework);
+    if (record.type !== "childList") {
+      continue;
     }
-  }, 500);
-};
 
-// Escucha el evento popstate (botón atrás/adelante del navegador)
-window.addEventListener('popstate', () => {
-  console.log("🔀 popstate detectado (navegación atrás/adelante)");
-
-  setTimeout(() => {
-    console.log("🔍 Re-ejecutando detección por popstate...");
-    const newFramework = detectFramework();
-
-    if (newFramework !== lastDetectedFramework) {
-      console.log(`📊 Estado cambió de ${lastDetectedFramework} a ${newFramework}`);
-      lastDetectedFramework = newFramework;
-      sendDetectionMessage(newFramework);
+    for (const node of record.addedNodes) {
+      if (elementLooksRelevant(node)) {
+        return true;
+      }
     }
-  }, 500);
-});
 
-console.log("🚀 Sistema de detección SPA configurado y activo");
+    for (const node of record.removedNodes) {
+      if (elementLooksRelevant(node)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+function scheduleNavigationDetection(reason) {
+  setTimeout(() => runDetection(reason), 350);
+}
+
+function patchHistoryMethod(methodName) {
+  const originalMethod = history[methodName];
+  if (typeof originalMethod !== "function") {
+    return;
+  }
+
+  history[methodName] = function patchedHistoryMethod(...args) {
+    const result = originalMethod.apply(this, args);
+    scheduleNavigationDetection(`history:${methodName}`);
+    return result;
+  };
+}
+
+const debouncedMutationDetection = debounce(() => runDetection("dom-mutation"), 900);
+
+try {
+  const observer = new MutationObserver((records) => {
+    if (hasRelevantMutation(records)) {
+      debouncedMutationDetection();
+    }
+  });
+
+  observer.observe(document.documentElement, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: Array.from(RELEVANT_ATTRIBUTES)
+  });
+} catch (error) {
+  console.error("[Te Pille] MutationObserver setup failed:", error);
+}
+
+patchHistoryMethod("pushState");
+patchHistoryMethod("replaceState");
+
+window.addEventListener("popstate", () => scheduleNavigationDetection("history:popstate"));
+window.addEventListener("hashchange", () => scheduleNavigationDetection("history:hashchange"));
+
+if (document.readyState === "complete" || document.readyState === "interactive") {
+  runDetection("initial");
+} else {
+  document.addEventListener("DOMContentLoaded", () => runDetection("domcontentloaded"), { once: true });
+}

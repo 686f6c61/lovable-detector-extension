@@ -27,74 +27,46 @@ Esta extensión de navegador está diseñada para detectar si un sitio web está
 
 ## CÓMO FUNCIONA
 
-La extensión opera analizando múltiples indicadores en el código fuente de la página web que se está visitando. Utiliza **11 métodos diferentes** de detección para identificar si un sitio fue construido con Lovable, incluyendo soporte completo para **Single Page Applications (SPAs)**.
+La extensión opera analizando señales técnicas verificadas en el HTML/DOM y calculando un score de detección. Incluye soporte para navegación en **Single Page Applications (SPAs)** y prioriza señales fuertes para reducir falsos positivos.
 
-### MÉTODOS DE DETECCIÓN
+### EVIDENCIAS COMPROBADAS (V2)
 
-#### 1. META TAG KEYWORDS
-Busca etiquetas meta keywords que contengan "lovable":
+#### 1. SCRIPT DE ANALYTICS DE LOVABLE (`~flock.js`)
 ```html
-<meta name="keywords" content="...lovable...">
+<script defer src="https://example.com/~flock.js"></script>
 ```
 
-#### 2. META TAG GENERATOR
-Detecta cuando el generador es Lovable:
+#### 2. `data-proxy-url` APUNTANDO A `~api/analytics`
 ```html
-<meta name="generator" content="Lovable">
+<script data-proxy-url="https://example.com/~api/analytics"></script>
 ```
 
-#### 3. META TAG AUTHOR
-Identifica cuando el autor es Lovable:
+#### 3. HOST EN SUBDOMINIO `.lovable.app`
+Detecta cuando el sitio vive en un host de Lovable:
+- `https://*.lovable.app`
+
+#### 4. BADGE DE LOVABLE EN EL DOM
+Detecta el badge de edición/publicación de Lovable:
+```html
+<div id="lovable-badge"></div>
+<a aria-label="Edit with Lovable"></a>
+<a href="https://lovable.dev/projects/..."></a>
+```
+
+#### 5. METADATOS DE AUTORÍA
 ```html
 <meta name="author" content="Lovable">
 ```
 
-#### 4. META TAG DESCRIPTION
-Busca referencias a Lovable en la descripción:
+#### 6. METADATOS TÍPICOS DE PLANTILLA LOVABLE
 ```html
-<meta name="description" content="...lovable...">
+<meta name="description" content="Lovable Generated Project">
+<meta name="twitter:site" content="@lovable_dev">
 ```
 
-#### 5. SCRIPTS CON DOMINIO LOVABLE.APP
-Detecta scripts cargados desde dominios de Lovable:
-```html
-<script src="https://wanderlust-connect-tribe.lovable.app/~flock.js"></script>
-```
-
-#### 6. LINKS CON DOMINIO LOVABLE
-Identifica hojas de estilo u otros recursos de Lovable:
-```html
-<link href="https://...lovable..." rel="stylesheet">
-```
-
-#### 7. RECURSOS LOVABLE-UPLOADS
-Detecta recursos alojados en el CDN de Lovable:
-```html
-<link rel="icon" href="/lovable-uploads/2ac905d4-de72-44a5-b3a9-9d97c5283e75.png">
-```
-
-#### 8. COMENTARIOS HTML
-Detecta comentarios en el código fuente que mencionen Lovable:
-```html
-<!-- Built with Lovable -->
-```
-
-#### 9. CLASES CSS E IDS
-Identifica elementos del DOM con clases o IDs relacionados:
-```html
-<div class="lovable-container">
-<div id="lovable-app">
-```
-
-#### 10. ATRIBUTOS DATA
-Busca atributos personalizados de datos:
-```html
-<div data-lovable="true">
-<div data-framework="lovable">
-```
-
-#### 11. ANÁLISIS COMPLETO DEL CÓDIGO FUENTE
-Como último recurso, busca la palabra "lovable" en cualquier parte del HTML.
+### REGLA DE SEGURIDAD ANTI FALSOS POSITIVOS
+La extensión **no usa** la aparición aislada de la palabra `"lovable"` en texto libre como evidencia suficiente.  
+Ejemplo: una página de diccionario con la palabra "lovable" no debe clasificarse como sitio construido con Lovable.
 
 ### CARACTERÍSTICAS AVANZADAS DE DETECCIÓN
 
@@ -103,11 +75,11 @@ La extensión incluye un sistema completo para detectar Lovable en SPAs que nave
 
 - **Interceptación de History API:** Detecta llamadas a `pushState()` y `replaceState()`
 - **Listener de popstate:** Captura navegación con botones atrás/adelante
-- **Polling de URL:** Verifica cambios de ruta cada 500ms
-- **Re-detección automática:** Ejecuta nueva detección tras navegación con delay inteligente
+- **Listener de hashchange:** Captura cambios de ruta basados en hash
+- **Re-detección automática:** Ejecuta nueva detección tras navegación con delay corto
 
 #### DETECCIÓN DINÁMICA DE CONTENIDO
-Implementa un MutationObserver que monitorea cambios en el DOM para detectar contenido cargado de forma asíncrona. Utiliza debounce de 1 segundo para optimizar el rendimiento.
+Implementa un MutationObserver con filtros de atributos relevantes para detectar cambios de DOM sin disparar análisis innecesarios. Utiliza debounce para optimizar el rendimiento.
 
 #### DETECCIÓN CASE-INSENSITIVE
 Todas las búsquedas son insensibles a mayúsculas y minúsculas para mayor flexibilidad y precisión.
@@ -125,12 +97,12 @@ Cuando se detecta un sitio web construido con Lovable, el icono de la extensión
 
 ### DETECCIÓN AVANZADA
 
-- **Detección múltiple:** Utiliza 11 métodos diferentes para identificar sitios Lovable
+- **Detección por señales verificadas:** Prioriza evidencias fuertes y score de confianza
 - **Soporte completo para SPAs:** Detecta navegación en Single Page Applications
 - **Insensible a mayúsculas:** Detecta variaciones en mayúsculas y minúsculas
 - **Detección en tiempo real:** Monitorea cambios dinámicos en el DOM con debounce
 - **Indicador visual:** Cambia el icono de la extensión al detectar un framework
-- **Alta precisión:** Reduce falsos negativos mediante múltiples verificaciones
+- **Menos falsos positivos:** No clasifica por palabra suelta en texto libre
 - **Detección de recursos:** Identifica scripts, links y recursos de Lovable
 - **Optimización inteligente:** Solo notifica cuando el estado de detección cambia
 
@@ -257,7 +229,7 @@ Página Web (DOM)
       v
 content.js (inyectado)
   - Analiza el DOM
-  - Ejecuta 6 métodos de detección
+  - Evalúa señales con score y confianza
   - Observa cambios dinámicos
       |
       v
@@ -266,7 +238,7 @@ chrome.runtime.sendMessage()
       v
 background.js (Service Worker)
   - Recibe mensajes
-  - Actualiza storage local
+  - Guarda estado por tabId
   - Gestiona historial (máx 100)
   - Actualiza estadísticas
   - Cambia icono de extensión
@@ -298,14 +270,23 @@ La extensión utiliza `chrome.storage.local` para persistir:
 
 ```javascript
 {
-  detectedFramework: "Lovable",        // Framework detectado actualmente
-  detectedAt: 1732012345678,           // Timestamp de detección
-  url: "https://example.com",          // URL donde se detectó
-  detectionHistory: [                  // Historial (máximo 100)
+  detectionsByTab: {
+    "123": {
+      detectedFramework: "Lovable",
+      detectedAt: 1732012345678,
+      url: "https://example.com",
+      score: 11,
+      confidence: 84,
+      signals: ["Script ~flock.js", "Meta author Lovable"]
+    }
+  },
+  detectionHistory: [                  // Historial por URL (máximo 100)
     {
       framework: "Lovable",
       url: "https://example.com",
-      timestamp: 1732012345678
+      timestamp: 1732012345678,
+      score: 11,
+      confidence: 84
     }
   ],
   totalDetections: 42                  // Contador total
@@ -322,7 +303,7 @@ lovable-detector-extension/
 ├── manifest.json              # Configuración de la extensión (Manifest V3)
 │
 ├── content.js                 # Script inyectado en páginas web
-│                              # Ejecuta los 6 métodos de detección
+│                              # Evalúa señales Lovable con score/confianza
 │
 ├── background.js              # Service Worker (background script)
 │                              # Gestiona storage, historial y estadísticas

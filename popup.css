@@ -98,9 +98,9 @@
  * Establece dimensiones, tema oscuro y animación pulse
  */
 body {
-  width: 280px;
-  min-width: 280px;
-  max-width: 400px;
+  width: 360px;
+  min-width: 320px;
+  max-width: 380px;
   text-align: center;
   background-color: #000000;
   color: #00FF00;
@@ -111,6 +111,7 @@ body {
   box-sizing: border-box;
   border-radius: 8px;
   animation: pulse 3s ease-in-out infinite;
+  overflow: hidden;
 }
 
 h1 {
@@ -254,36 +255,75 @@ a:hover {
   border: 1px dashed #00FF00;
   border-radius: 4px;
   animation: fadeIn 0.4s ease-in;
+  overflow: hidden;
 }
 
 .stat-item {
   display: flex;
-  justify-content: space-between;
-  padding: 5px 0;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 6px 0;
   font-size: 12px;
+  text-align: left;
 }
 
 .stat-label {
   color: #00FFFF;
+  flex: 0 0 96px;
+  line-height: 1.35;
+  word-break: break-word;
 }
 
 .stat-value {
   color: #FF00FF;
   font-weight: bold;
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: right;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.stat-item-url .stat-value {
+  text-align: left;
+  white-space: normal;
+  font-size: 11px;
+}
+
+.evidence-section {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #0a0a0a;
+  border: 1px dashed #00FFFF;
+  border-radius: 4px;
+  text-align: left;
+  animation: fadeIn 0.4s ease-in;
+}
+
+.evidence-title {
+  margin: 0 0 8px 0;
+  color: #00FFFF;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.evidence-list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.evidence-item {
+  color: #00FF00;
+  font-size: 11px;
+  line-height: 1.4;
+  margin-bottom: 4px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 /* Responsive design */
-@media (min-width: 320px) {
-  body {
-    width: 320px;
-  }
-}
-
-@media (min-width: 400px) {
-  body {
-    width: 400px;
-  }
-
+@media (min-width: 420px) {
   h1 {
     font-size: 22px;
   }
